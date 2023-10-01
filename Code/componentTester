@@ -1,0 +1,143 @@
+/*THIS CODE IS FOR TESTING ALL ACTUATORS AND SENSORS*/
+
+#include <Servo.h>
+#include <RN.h>
+#include "SoftwareSerial.h"
+
+/// Define DC Motor Pins
+#define enA 10
+#define in1  9
+#define in2 8
+/// Define UltraSonic sensor pins
+#define trigL 14
+#define echoL 15
+#define trigC 20
+#define echoC 21
+#define trigR 17
+#define echoR 18
+///Define Servo pins
+#define sPin 2
+
+///Define colour sensor pins
+#define s0 3
+#define s1 4
+#define s2 5
+#define s3 6
+#define colourOut 7
+
+RN colorSensor(s0, s1, s2, s3, colourOut);
+
+Servo myservo; 
+
+HUSKYLENS huskylens;
+SoftwareSerial mySerial(11,12); // RX, TX
+
+///Define various variables
+int durL ;
+int distL;
+int durC ;
+int distC;
+int durR ;
+int distR;
+
+int avgDist;
+
+const int servoCenter = 90;
+const int servoTurn = 45;
+
+unsigned int rValue;
+unsigned int gValue;
+unsigned int bValue;
+
+float result;
+
+void setup() {
+  // put your setup code here, to run once:
+
+Serial.begin(115200);
+mySerial.begin(9600);
+//H bridge DC Motor pins
+pinMode (enA, OUTPUT);
+pinMode (in1, OUTPUT);
+pinMode (in2, OUTPUT);
+// Servo pins
+myservo.attach(sPin);
+
+//Ultrasonic Sensor pins
+pinMode(trigL, OUTPUT);
+pinMode(echoL, INPUT); 
+pinMode(trigC, OUTPUT);
+pinMode(echoC, INPUT); 
+pinMode(trigR, OUTPUT);
+pinMode(echoR, INPUT); 
+
+//Colour Sensor setup
+
+pinMode(s0, OUTPUT);
+pinMode(s1, OUTPUT); 
+pinMode(s2, OUTPUT);
+pinMode(s3, OUTPUT); 
+pinMode(colourOut, INPUT);
+colorSensor.begin();
+
+myservo.write(servoCenter);
+
+}
+
+
+
+void loop() {
+    if (!huskylens.request()) Serial.println(F("Fail to request data from HUSKYLENS, recheck the connection!"));
+    else if(!huskylens.isLearned()) Serial.println(F("Nothing learned, press learn button on HUSKYLENS to learn one!"));
+    else if(!huskylens.available()) Serial.println(F("No block or arrow appears on the screen!"));
+    else
+    {
+        Serial.println(F("###########"));
+        while (huskylens.available())
+        {
+            HUSKYLENSResult result = huskylens.read();
+            printResult(result);
+        }    
+    }
+}
+
+void printResult(HUSKYLENSResult result){
+    if (result.command == COMMAND_RETURN_BLOCK){
+        Serial.println(String()+result.ID);
+    }
+    else if (result.command == COMMAND_RETURN_ARROW){
+        Serial.println(String()+F("Arrow:xOrigin=")+result.xOrigin+F(",yOrigin=")+result.yOrigin+F(",xTarget=")+result.xTarget+F(",yTarget=")+result.yTarget+F(",ID=")+result.ID);
+    }
+    else{
+        Serial.println("Object unknown!");
+    }
+}
+
+
+void Stop() {
+  myservo.write(servoCenter);
+  analogWrite (enA, 0);
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, LOW);
+}
+
+void Forward() {
+  analogWrite (enA,150);
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);
+}
+
+void turnRight() {
+  myservo.write(180);
+  delay(1000);
+
+}
+
+void turnLeft() {
+  myservo.write(0);
+  delay(1000);
+
+}
+
+
+
