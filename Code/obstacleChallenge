@@ -1,0 +1,217 @@
+/*THIS CODE IS FOR THE OBSTACLE CHALLENGE AND USES THE CAMERA TO DETECT COLOR AND TURN*/
+#include <Servo.h>
+#include <RN.h>
+#include "HUSKYLENS.h"
+#include "SoftwareSerial.h"
+
+/// Define DC Motor Pins
+#define enA 10
+#define in1  9
+#define in2 8
+/// Define UltraSonic sensor pins
+#define trigL 14
+#define echoL 15
+#define trigC 20
+#define echoC 21
+#define trigR 17
+#define echoR 18
+///Define Servo pins
+#define sPin 2
+
+///Define colour sensor pins
+#define s0 3
+#define s1 4
+#define s2 5
+#define s3 6
+#define colourOut 7
+
+RN colorSensor(s0, s1, s2, s3, colourOut);
+
+Servo myservo; 
+
+HUSKYLENS huskylens;
+SoftwareSerial mySerial(11,12); // RX, TX
+
+///Define various variables
+int durL ;
+int distL;
+int durC ;
+int distC;
+int durR ;
+int distR;
+
+int avgDist;
+
+const int servoCenter = 90;
+const int servoTurn = 45;
+
+unsigned int rValue;
+unsigned int gValue;
+unsigned int bValue;
+
+void printResult(HUSKYLENSResult result);
+
+void setup() {
+  // put your setup code here, to run once:
+
+Serial.begin(115200);
+mySerial.begin(9600);
+//H bridge DC Motor pins
+pinMode (enA, OUTPUT);
+pinMode (in1, OUTPUT);
+pinMode (in2, OUTPUT);
+// Servo pins
+myservo.attach(sPin);
+
+//Ultrasonic Sensor pins
+pinMode(trigL, OUTPUT);
+pinMode(echoL, INPUT); 
+pinMode(trigC, OUTPUT);
+pinMode(echoC, INPUT); 
+pinMode(trigR, OUTPUT);
+pinMode(echoR, INPUT); 
+
+//Colour Sensor setup
+
+pinMode(s0, OUTPUT);
+pinMode(s1, OUTPUT); 
+pinMode(s2, OUTPUT);
+pinMode(s3, OUTPUT); 
+pinMode(colourOut, INPUT);
+colorSensor.begin();
+
+while (!huskylens.begin(mySerial))
+    {
+        Serial.println(F("Begin failed!"));
+        Serial.println(F("1.Please recheck the \"Protocol Type\" in HUSKYLENS (General Settings>>Protocol Type>>I2C)"));
+        Serial.println(F("2.Please recheck the connection."));
+        delay(100);
+    }
+
+myservo.write(servoCenter);
+
+}
+
+
+void loop() {
+  if (!huskylens.request()) Serial.println(F("Fail to request data from HUSKYLENS, recheck the connection!"));
+    else if(!huskylens.available()) Serial.println(F("No block or arrow appears on the screen!"));
+    else
+    {
+        Serial.println(F("###########"));
+        while (huskylens.available())
+        {
+            HUSKYLENSResult result = huskylens.read();
+            printResult(result);
+        }    
+    }
+  // put your main code here, to run repeatedly:
+  /*
+digitalWrite(trigL, HIGH);
+delayMicroseconds(10);
+digitalWrite(trigL, LOW);
+
+durL =  pulseIn(echoL, HIGH);
+
+distL = 0.01715 * durL ;
+
+digitalWrite(trigC, HIGH);
+delayMicroseconds(10);
+digitalWrite(trigC, LOW);
+
+durC =  pulseIn(echoC, HIGH);
+
+distC = 0.01715 * durC ;
+
+
+digitalWrite(trigR, HIGH);
+delayMicroseconds(10);
+digitalWrite(trigR, LOW);
+
+durR =  pulseIn(echoR, HIGH);
+
+distR = 0.01715 * durR ;
+Serial.print("Left:" );
+Serial.println(distL);
+Serial.print("Right:");
+Serial.println(distR);
+delay(10);
+
+*/
+
+
+
+}
+/* else{
+if (abs(avgDist-distL)<7){
+myservo.write(servoCenter);
+}
+  else if (distL > distR) {
+    // Turn the servo to the left position (adjust the angle as needed)
+    myservo.write(55);
+    delay(1);  
+   } else if (distL < distR) {
+    myservo.write(125);
+    delay(1);  
+   }
+*/
+  
+
+
+
+
+
+  
+
+void Stop() {
+  myservo.write(servoCenter);
+  analogWrite (enA, 0);
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, LOW);
+}
+
+void Forward() {
+  myservo.write(servoCenter);
+  analogWrite (enA, 200);
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);
+}
+
+void turnLeft() {
+  myservo.write(30);
+  delay(1000);
+  myservo.write(60);
+    analogWrite (enA, 255);
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH)
+;
+}
+
+void turnRight() {
+  myservo.write(110);
+  delay(1000);
+  myservo.write(servoCenter);
+    analogWrite (enA, 170);
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);
+}
+
+void printResult(HUSKYLENSResult result){
+    if (result.command == COMMAND_RETURN_BLOCK){
+        if(result.ID == 1){
+        myservo.write(50);
+        Serial.println("1");
+        }
+        else if(result.ID == 2){
+        myservo.write(120)  ;
+    
+       
+        }
+        else{
+        Serial.println("Default"); 
+        }
+     }
+    else{
+        Serial.println("Object unknown!");
+    }
+}
