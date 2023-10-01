@@ -1,1 +1,1 @@
-These photos may be used without asking the owners.
+These are the schematics for each piece of wiring used.
