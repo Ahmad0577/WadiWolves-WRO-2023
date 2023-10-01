@@ -1,0 +1,149 @@
+/*OLD CODE FOR THE OPEN CHALLANGE WHICH UTLISED A SIGN CURVE TO TURN PROPORTOINALITY*/
+
+#include <Servo.h>
+
+/// Define DC Motor Pins
+int enA = 10;
+int in1 = 9;
+int in2 =8;
+/// Define UltraSonic sensor pins
+int trigL=14;
+int echoL=15;
+int trigC =20;
+int echoC= 21;
+int trigR = 17;
+int echoR = 18;
+///Define Servo pins
+int sPin = 2;
+Servo myservo; 
+///efine various variables
+int durL ;
+int distL;
+int durC ;
+int distC;
+int durR ;
+int distR;
+int avgDist;
+int turnRate = 5;
+int turn; 
+int servoCenter = 90;
+int servoTurn = 45;
+int diff;
+void setup() {
+  // put your setup code here, to run once:
+
+Serial.begin(115200);
+
+pinMode (enA, OUTPUT);
+pinMode (in1, OUTPUT);
+pinMode (in2, OUTPUT);
+
+myservo.attach(sPin);
+
+pinMode(trigL, OUTPUT);
+pinMode(echoL, INPUT); 
+pinMode(trigC, OUTPUT);
+pinMode(echoC, INPUT); 
+pinMode(trigR, OUTPUT);
+pinMode(echoR, INPUT); 
+
+}
+
+
+void loop() {
+  // put your main code here, to run repeatedly:
+digitalWrite(trigL, HIGH);
+delayMicroseconds(10);
+digitalWrite(trigL, LOW);
+
+durL =  pulseIn(echoL, HIGH);
+
+distL = 0.01715 * durL ;
+
+digitalWrite(trigC, HIGH);
+delayMicroseconds(10);
+digitalWrite(trigC, LOW);
+
+durC =  pulseIn(echoC, HIGH);
+
+distC = 0.01715 * durC ;
+
+
+digitalWrite(trigR, HIGH);
+delayMicroseconds(10);
+digitalWrite(trigR, LOW);
+
+durR =  pulseIn(echoR, HIGH);
+
+distR = 0.01715 * durR ;
+Serial.print("Left:" );
+Serial.println(distL);
+Serial.print("Right:");
+Serial.println(distR);
+Serial.print("AvgDist:");
+Serial.println(abs(avgDist-distL));
+delay(100);
+
+
+///turn = (abs(avgDist-distL)/10)*turnRate;
+//Servo Turn
+  /* if (distL > 20) {
+    // Turn the servo to the left position (adjust the angle as needed)
+    myservo.write(45);
+    delay(500);  
+   } else {
+       myservo.write(90);
+
+
+}
+*/ 
+
+///turn = min(max(turn, 40), 140);
+diff = distL - distR;
+
+Forward();
+delay(100)
+avgDist = ((distL+distR)/2);
+///Servo Center 
+if (diff=0) {
+myservo.write(90);
+   }
+    else {
+    turn = (180/PI)*(asin(diff/80)/2);
+turn = int(turn);
+myservo.write(turn);
+
+    }
+}
+void Stop() {
+  myservo.write(servoCenter);
+  analogWrite (enA, 0);
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, LOW);
+}
+
+void Forward() {
+  myservo.write(servoCenter);
+  analogWrite (enA, 255);
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);
+}
+
+void turnLeft() {
+  myservo.write(30);
+  delay(1000);
+  myservo.write(servoCenter);
+    analogWrite (enA, 170);
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);
+}
+
+void turnRight() {
+  myservo.write(110);
+  delay(1000);
+  myservo.write(servoCenter);
+    analogWrite (enA, 170);
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);
+}
+
