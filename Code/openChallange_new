@@ -1,3 +1,5 @@
+/*THIS IS CODE FOR THE OPEN CHALLENGE AND UTILISES ULTRASONIC SENSORS*/
+
 #include <Servo.h>
 
 /*########## DEFINING PINS ##########*/
