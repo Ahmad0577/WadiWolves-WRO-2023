@@ -1,0 +1,164 @@
+#include <Servo.h>
+
+/*########## DEFINING PINS ##########*/
+  // Define DC Motor Pins
+  int enA = 10;
+  int in1 = 9;
+  int in2 = 8;
+  // Define UltraSonic sensor pins
+  int trigL = 14;
+  int echoL = 15;
+  int trigC = 20;
+  int echoC = 21;
+  int trigR = 17;
+  int echoR = 18;
+  //Define Servo pins
+  int sPin = 2;
+  Servo myservo;
+/*########## DEFINING VARIABLES##########*/
+  //Define ultrasonic sensor variables
+  int durL;
+  int distL;
+  int durC;
+  int distC;
+  int durR;
+  int distR;
+  //Define servo variables
+  int Deg;
+  int servoCenter = 90;
+  int servoRight = 125;
+  int servoLeft = 55;
+  float diff;
+  int rot;
+  unsigned long startTime;
+  unsigned long currentTime;
+  unsigned long duration = 500;
+
+/*########## SETUP ##########*/
+
+  void setup() {
+
+    Serial.begin(115200);
+
+    pinMode(enA, OUTPUT);
+    pinMode(in1, OUTPUT);
+    pinMode(in2, OUTPUT);
+
+    myservo.attach(sPin);
+
+    pinMode(trigL, OUTPUT);
+    pinMode(echoL, INPUT);
+    pinMode(trigC, OUTPUT);
+    pinMode(echoC, INPUT);
+    pinMode(trigR, OUTPUT);
+    pinMode(echoR, INPUT);
+
+    myservo.write(servoCenter); //Centering code before begining
+  }
+
+/*########## LOOP ##########*/
+
+void loop() {
+    currentTime = millis();
+    US();
+    Forward();
+    Turn();
+    delay(5);
+
+  }
+
+/*########## OTHER FUNCTIONS ##########*/
+
+void US() {  //For the ultrasonic sensor to get a reading
+    //Left sensor
+  
+      digitalWrite(trigL, HIGH);
+      delayMicroseconds(10);
+      digitalWrite(trigL, LOW);
+
+      durL = pulseIn(echoL, HIGH); 
+
+      distL = 0.01715 * durL;
+
+    //Center sensor
+      digitalWrite(trigC, HIGH);
+      delayMicroseconds(10);
+      digitalWrite(trigC, LOW);
+
+      durC = pulseIn(echoC, HIGH);
+
+      distC = 0.01715 * durC;
+
+    //Right sensor
+
+      digitalWrite(trigR, HIGH);
+      delayMicroseconds(10);
+      digitalWrite(trigR, LOW);
+
+      durR = pulseIn(echoR, HIGH);
+
+      distR = 0.01715 * durR;
+
+      diff = distL - distR; //Defining the difference between the distance to the left and right
+
+  }
+
+  void Stop() {  ///For stopping the motor completely
+    myservo.write(servoCenter);
+    analogWrite(enA, 0);
+    digitalWrite(in1, LOW);
+    digitalWrite(in2, LOW);
+  }
+
+  void Forward() { //For going forward
+    analogWrite(enA, 250);
+    digitalWrite(in1, LOW);
+    digitalWrite(in2, HIGH);
+  }
+
+  void Backward() { //For going forward
+    analogWrite(enA, 255);
+    digitalWrite(in1, HIGH);
+    digitalWrite(in2, LOW);
+  }
+
+  void Turn() { //For turning left and right automatically depending on robot position
+    if (diff > 0){
+    myservo.write(servoLeft);
+    }
+
+    else if (diff < 0) {
+      myservo.write(servoRight);
+    }
+    
+    else{
+      myservo.write(servoCenter);
+    }
+  }
+
+void WallDetect(){
+    if (distC < 10) {
+
+      if (currentTime - startTime < duration) {
+
+        Serial.println(startTime);
+        Serial.println("/");
+        Serial.println(currentTime);
+    
+      US();
+      Backward();
+      myservo.write(servoRight);
+
+      }
+      else{}
+    }
+    else {
+      startTime = currentTime;
+    
+  }
+  }
+
+
+
+
+
