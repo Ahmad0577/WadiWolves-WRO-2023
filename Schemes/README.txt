@@ -1,1 +1,1 @@
-These are the schematics for each piece of wiring used.
+These are the schematics for parts used in the WadiRover (Our car).
