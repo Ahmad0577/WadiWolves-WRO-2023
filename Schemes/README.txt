@@ -1,1 +1,1 @@
-These are the schematics for parts used in the WadiRover (Our car).
+These are the schematics for parts used in the WadiRover (Our robot car).
