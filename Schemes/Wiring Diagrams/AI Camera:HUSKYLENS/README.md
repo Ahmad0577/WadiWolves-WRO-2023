@@ -1,1 +1,1 @@
-We use this camera for the detection of obstacles and to detect their color. It recieves instructions from the arduino through the recieve channel, and sends back input date throught the transmit channel.
+We use this camera for the detection of obstacles and to detect their color. It recieves instructions from the arduino through the recieve channel, and sends back input data throught the transmit channel.
