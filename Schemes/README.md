@@ -1,1 +1,1 @@
-These are the schematics for parts used in the WadiRover (Our robot car).
+These are all the non-code materials, ideas, drawings, graphs, and lists. 
